@@ -8,52 +8,7 @@
 
 void spoof_lock_state(void) {
     uint32_t addr = 0;
-	int spoofing = is_spoofing_enabled();
-   fastboot_publish("is-spoofing", spoofing ? "1" : "0");
-
-    if (!spoofing) {
-        printf("Bootloader lock status spoofing disabled.\n");
-        return;
-    }
-// When we spoof the lock state to appear "locked", fastboot starts rejecting 
-    // commands with "not support on security" and "not allowed in locked state" 
-    // errors. This is annoying since the device is actually unlocked underneath, 
-    // the security checks are just being overly paranoid.
-    //
-    // This patch removes both security gates so fastboot commands work regardless
-    // of what the spoofed lock state reports.
-//0x4c426814
-    addr = SEARCH_PATTERN(LK_START, LK_END, 0xE92D, 0x4FF0, 0xB0A7, 0xAA1C);
-    if (addr) {
-        printf("Found fastboot command processor at 0x%08X\n", addr);
-        
-        // NOP the error message calls
-        NOP(addr + 0x6B8, 2);  // "not support on security" call   //0x4c426ecc
-        NOP(addr + 0x6F8, 2);  // "not allowed in locked state" call  //4c426f0c
-        
-        // Jump directly to command handler
-        PATCH_MEM(addr + 0x14A,
-            0xE00B, // b 0x4c42cf9c
-            0xBF00  // nop
-        );
-    }
-
-   // AVB adds device state info to the kernel cmdline, but it keeps showing
-     // "unlocked" even when we want it to say "locked". This patch forces
-    // the cmdline to always use the "locked" string instead of checking
-    // the actual device state.
-    addr = SEARCH_PATTERN(LK_START, LK_END, 0xE92D, 0x4FF0, 0x4691, 0xF102);
-    if (addr) {
-        printf("Found AVB cmdline function at 0x%08X\n", addr);
-       
-        // Find where in libavb the device state is first fetched and then stored,
-        // then Nop out the code that checks the actual device state.
-        // This forces libavb to always use the "locked" string.
-        NOP(addr + 0x9C, 4);
-    }
-    printf("Bootloader lock status spoofing enabled, applying patches.\n");
-
-    // Need to spoof the LKS_STATE as "locked" for certain scenarios, but still
+   // Need to spoof the LKS_STATE as "locked" for certain scenarios, but still
     // return success so other parts of the system don't freak out. This makes
     // seccfg_get_lock_state always report lock_state=1 and return 2.
     addr = SEARCH_PATTERN(LK_START, LK_END, 0xB1D0, 0xB510, 0x4604, 0xF7FF, 0xFFDD);
@@ -79,6 +34,51 @@ void spoof_lock_state(void) {
             0x4770   // bx lr            - return
         );
     }
+// When we spoof the lock state to appear "locked", fastboot starts rejecting 
+    // commands with "not support on security" and "not allowed in locked state" 
+    // errors. This is annoying since the device is actually unlocked underneath, 
+    // the security checks are just being overly paranoid.
+    //
+    // This patch removes both security gates so fastboot commands work regardless
+    // of what the spoofed lock state reports.
+//0x4c426814
+    addr = SEARCH_PATTERN(LK_START, LK_END, 0xE92D, 0x4FF0, 0xB0A7, 0xAA1C);
+    if (addr) {
+        printf("Found fastboot command processor at 0x%08X\n", addr);
+        
+        // NOP the error message calls
+        NOP(addr + 0x6B8, 2);  // "not support on security" call   //0x4c426ecc
+        NOP(addr + 0x6F8, 2);  // "not allowed in locked state" call  //4c426f0c
+        
+        // Jump directly to command handler
+        PATCH_MEM(addr + 0x14A,
+            0xE00B, // b 0x4c42cf9c
+            0xBF00  // nop
+        );
+    }
+	int spoofing = is_spoofing_enabled();
+   fastboot_publish("is-spoofing", spoofing ? "1" : "0");
+
+    if (!spoofing) {
+        printf("Bootloader lock status spoofing disabled.\n");
+        return;
+    }
+   // AVB adds device state info to the kernel cmdline, but it keeps showing
+     // "unlocked" even when we want it to say "locked". This patch forces
+    // the cmdline to always use the "locked" string instead of checking
+    // the actual device state.
+    addr = SEARCH_PATTERN(LK_START, LK_END, 0xE92D, 0x4FF0, 0x4691, 0xF102);
+    if (addr) {
+        printf("Found AVB cmdline function at 0x%08X\n", addr);
+       
+        // Find where in libavb the device state is first fetched and then stored,
+        // then Nop out the code that checks the actual device state.
+        // This forces libavb to always use the "locked" string.
+        NOP(addr + 0x9C, 4);
+    }
+    printf("Bootloader lock status spoofing enabled, applying patches.\n");
+
+ 
 
 
 }
