@@ -8,6 +8,13 @@
 
 void spoof_lock_state(void) {
     uint32_t addr = 0;
+	int spoofing = is_spoofing_enabled();
+   fastboot_publish("is-spoofing", spoofing ? "1" : "0");
+
+    if (!spoofing) {
+        printf("Bootloader lock status spoofing disabled.\n");
+        return;
+    }
 // When we spoof the lock state to appear "locked", fastboot starts rejecting 
     // commands with "not support on security" and "not allowed in locked state" 
     // errors. This is annoying since the device is actually unlocked underneath, 
@@ -30,13 +37,7 @@ void spoof_lock_state(void) {
             0xBF00  // nop
         );
     }
-   int spoofing = is_spoofing_enabled();
-   fastboot_publish("is-spoofing", spoofing ? "1" : "0");
 
-    if (!spoofing) {
-        printf("Bootloader lock status spoofing disabled.\n");
-        return;
-    }
    // AVB adds device state info to the kernel cmdline, but it keeps showing
      // "unlocked" even when we want it to say "locked". This patch forces
     // the cmdline to always use the "locked" string instead of checking
