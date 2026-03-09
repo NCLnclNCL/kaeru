@@ -383,4 +383,9 @@ menu "Device Support"
         default n
         help
           Say Y if you want to include support for Motorola G17 / G17 Power
+    config TECNO_LE7
+        bool "Support tecno pova 2"
+        default n
+        help
+          Say Y if you want to include support for tecno pova 2
 endmenu
