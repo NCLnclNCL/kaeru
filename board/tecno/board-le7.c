@@ -9,6 +9,15 @@
 static void env_init(void) {
     ((void (*)(void))(ENV_INIT_ADDR | 1))();
 }
+static void set_lock_spoof(int enable) {
+    if (enable == 1) {
+        set_env("lock_spoof", "enabled");
+    } else if (enable == 0) {
+        set_env("lock_spoof", "disabled");
+    } else {
+        set_env("lock_spoof", "not_set");
+    }
+}
 static void check_lock_spoof(void)
 {
     const char *val = get_env("lock_spoof");
@@ -26,6 +35,63 @@ static void check_lock_spoof(void)
         dprintf("Setting lock_spoof as not_set\n");
         set_env("lock_spoof", "not_set");
     }
+}
+void cmd_spoof_bootloader_lock(const char* arg, void* data, unsigned sz) {
+    uint32_t status = 0;
+    const char* env_value = get_env("lock_spoof");
+    const char *option = arg + 1;
+    status = (env_value && strcmp(env_value, "1") == 0) ? 1 : 0;
+
+    if (option) {
+        if (!strcmp(option, "off")) {
+            if (status) {
+                set_lock_spoof(0);
+                fastboot_publish("is-spoofing", "0");
+                fastboot_info("Bootloader spoofing disabled.");
+                fastboot_info("A factory reset may be required.");
+            } else {
+                fastboot_info("Bootloader spoofing is already disabled.");
+            }
+            fastboot_okay("");
+            return;
+        }
+
+        if (!strcmp(option, "on")) {
+            if (!status) {
+                set_lock_spoof(1);
+                fastboot_publish("is-spoofing", "1");
+                fastboot_info("Bootloader spoofing enabled.");
+                fastboot_info("A factory reset may be required.");
+            } else {
+                fastboot_info("Bootloader spoofing is already enabled.");
+            }
+            fastboot_okay("");
+            return;
+        }
+
+        if (!strcmp(option, "status")) {
+            fastboot_info(status ?
+                "Bootloader spoofing is currently enabled." :
+                "Bootloader spoofing is currently disabled.");
+            fastboot_info(status ?
+                "Device is currently spoofed as bootloader locked." :
+                "Device is not being spoofed as bootloader locked.");
+            fastboot_okay("");
+            return;
+        }
+    }
+
+
+    fastboot_info("kaeru bootloader lock spoofing control");
+    fastboot_info("");
+    fastboot_info("When enabled, device reports as 'locked' to TEE");
+    fastboot_info("while maintaining full fastboot and root capabilities.");
+    fastboot_info("");
+    fastboot_info("Commands:");
+    fastboot_info("  on     - Enable spoofing (reboot required)");
+    fastboot_info("  off    - Disable spoofing (reboot required)");
+    fastboot_info("  status - Show current state");
+    fastboot_fail("Usage: fastboot oem bldr_spoof <on|off|status>");
 }
 static void hijack_env_init(void) {
     env_init();
@@ -149,7 +215,7 @@ void board_early_init(void) {
     }
 	
   
-  //  fastboot_register("oem bldr_spoof", cmd_spoof_bootloader_lock, 0);
+    fastboot_register("oem bldr_spoof", cmd_spoof_bootloader_lock, 0);
 }
 
 void board_late_init(void) {
