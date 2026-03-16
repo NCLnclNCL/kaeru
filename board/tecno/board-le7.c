@@ -83,7 +83,7 @@ static void check_lock_spoof(void)
         set_env("lock_spoof", "not_set");
     }
 }
-void cmd_spoof_bootloader_lock(const char* arg, void* data, unsigned sz) {
+void custom_cmd_spoof_bootloader_lock(const char* arg, void* data, unsigned sz) {
     uint32_t status = 0;
     const char* env_value = get_env("lock_spoof");
     const char *option = arg + 1;
@@ -216,7 +216,7 @@ void board_early_init(void) {
     }
 	
   
-    fastboot_register("oem bldr_spoof", cmd_spoof_bootloader_lock, 0);
+    fastboot_register("oem bldr_spoof", custom_cmd_spoof_bootloader_lock, 0);
 }
 
 void board_late_init(void) {
