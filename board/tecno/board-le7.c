@@ -97,7 +97,7 @@ static void hijack_env_init(void) {
     env_init();
     check_lock_spoof();
 }
-void spoof_lock_state(void) {
+static void spoof_lock_state(void) {
     uint32_t addr = 0;
 	printf("Bootloader lock status spoofing enabled, applying patches.\n");
 
