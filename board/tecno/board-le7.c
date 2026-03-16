@@ -115,9 +115,10 @@ void board_early_init(void) {
         
         // Jump directly to command handler
         PATCH_MEM(addr + 0x14A, //  4C42695E ok
-            0xE006 // b 4C43481A maybe ok
+            0x164 // b 4C43481A maybe ok
     //        0xBF00  // nop wtf is this?
         );
+		//4c426978
     }
 // AVB adds device state info to the kernel cmdline, but it keeps showing
      // "unlocked" even when we want it to say "locked". This patch forces
