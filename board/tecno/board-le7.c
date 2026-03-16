@@ -71,15 +71,15 @@ static void check_lock_spoof(void)
 
     if (val && strcmp(val, "enabled") == 0) {
         custom_spoof_lock_state();
-        dprintf("Lock spoof is Enabled\n");
+        printf("Lock spoof is Enabled\n");
     } else if (val && strcmp(val, "disabled") == 0) {
-        dprintf("Lock spoof is Disabled\n");
+       printf("Lock spoof is Disabled\n");
     } else if (val && strcmp(val, "not_set") == 0) {
-        dprintf("Lock spoof is not_set\n");
+       printf("Lock spoof is not_set\n");
     } else {
-        dprintf("Something went wrong with kaeru lock spoof environment...\n");
-        dprintf("or possible first boot of kaeru detected...\n");
-        dprintf("Setting lock_spoof as not_set\n");
+       printf("Something went wrong with kaeru lock spoof environment...\n");
+       printf("or possible first boot of kaeru detected...\n");
+       printf("Setting lock_spoof as not_set\n");
         set_env("lock_spoof", "not_set");
     }
 }
