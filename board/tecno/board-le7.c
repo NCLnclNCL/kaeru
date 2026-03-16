@@ -23,7 +23,7 @@ static void check_lock_spoof(void)
     const char *val = get_env("lock_spoof");
 
     if (val && strcmp(val, "enabled") == 0) {
-        spoof_lock_state();
+        custom_spoof_lock_state();
         dprintf("Lock spoof is Enabled\n");
     } else if (val && strcmp(val, "disabled") == 0) {
         dprintf("Lock spoof is Disabled\n");
@@ -97,7 +97,7 @@ static void hijack_env_init(void) {
     env_init();
     check_lock_spoof();
 }
-static void spoof_lock_state(void) {
+static void custom_spoof_lock_state(void) {
     uint32_t addr = 0;
 	printf("Bootloader lock status spoofing enabled, applying patches.\n");
 
