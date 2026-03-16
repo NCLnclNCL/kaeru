@@ -116,7 +116,7 @@ void board_early_init(void) {
         // Jump directly to command handler
         PATCH_MEM(addr + 0x14A, //  4C42695E ok
             0xE006 // b 4C43481A maybe ok
-           // 0xBF00  // nop wtf is this?
+            0xBF00  // nop wtf is this?
         );
     }
 
