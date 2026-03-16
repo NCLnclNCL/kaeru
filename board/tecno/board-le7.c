@@ -207,16 +207,16 @@ void board_early_init(void) {
     }
 	    // Patch calling env_init to inject check_lock_spoof() right after 
     // manual initialization of environment
-    PATCH_CALL(ENV_INIT_CALL, (void*)hijack_env_init, TARGET_THUMB);
+   // PATCH_CALL(ENV_INIT_CALL, (void*)hijack_env_init, TARGET_THUMB);
 
-	   // - Volume down → Fastboot
+
+	custom_spoof_lock_state();
+  	   // - Volume down → Fastboot
     if (mtk_detect_key(VOLUME_DOWN)) {
         set_bootmode(BOOTMODE_FASTBOOT);
 	show_bootmode(BOOTMODE_FASTBOOT);
     }
-	
-  
-    fastboot_register("oem bldr_spoof", custom_cmd_spoof_bootloader_lock, 0);
+  //  fastboot_register("oem bldr_spoof", custom_cmd_spoof_bootloader_lock, 0);
 }
 
 void board_late_init(void) {
