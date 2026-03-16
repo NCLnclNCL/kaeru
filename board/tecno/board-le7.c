@@ -8,28 +8,6 @@
 
 void spoof_lock_state(void) {
     uint32_t addr = 0;
-// When we spoof the lock state to appear "locked", fastboot starts rejecting 
-    // commands with "not support on security" and "not allowed in locked state" 
-    // errors. This is annoying since the device is actually unlocked underneath, 
-    // the security checks are just being overly paranoid.
-    //
-    // This patch removes both security gates so fastboot commands work regardless
-    // of what the spoofed lock state reports.
-//0x4c426814
-    addr = SEARCH_PATTERN(LK_START, LK_END, 0xE92D, 0x4FF0, 0xB0A7, 0xAA1C);
-    if (addr) {
-        printf("Found fastboot command processor at 0x%08X\n", addr);
-        
-        // NOP the error message calls
-        NOP(addr + 0x6B8, 2);  // "not support on security" call   //0x4c426ecc
-        NOP(addr + 0x6F8, 2);  // "not allowed in locked state" call  //4c426f0c
-        
-        // Jump directly to command handler
-        PATCH_MEM(addr + 0x14A,
-            0xE006, // b 4C43481A
-            0xBF00  // nop
-        );
-    }
    int spoofing = is_spoofing_enabled();
    fastboot_publish("is-spoofing", spoofing ? "1" : "0");
 
@@ -113,12 +91,12 @@ void board_early_init(void) {
     // initialization completes, it's a convenient entry point since
     // the call itself is non-essential and we need the env to be ready
     // before applying our lock state patches.
-    addr = SEARCH_PATTERN(LK_START, LK_END, 0xF02F, 0xFDB2, 0xFFC5, 0xF7FD);
-    if (addr) {
-        printf("Found env_init_done at 0x%08X\n", addr);
-        PATCH_CALL(addr, (void*)spoof_lock_state, TARGET_THUMB);
-    }
-
+   // addr = SEARCH_PATTERN(LK_START, LK_END, 0xF02F, 0xFDB2, 0xFFC5, 0xF7FD);
+   // if (addr) {
+   //     printf("Found env_init_done at 0x%08X\n", addr);
+    //    PATCH_CALL(addr, (void*)spoof_lock_state, TARGET_THUMB);
+   // }
+	PATCH_CALL(0x4c4028a4, (void*)spoof_lock_state, TARGET_THUMB);
     // When we spoof the lock state to appear "locked", fastboot starts rejecting 
     // commands with "not support on security" and "not allowed in locked state" 
     // errors. This is annoying since the device is actually unlocked underneath, 
