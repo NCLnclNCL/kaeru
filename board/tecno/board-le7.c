@@ -40,7 +40,7 @@ void cmd_spoof_bootloader_lock(const char* arg, void* data, unsigned sz) {
     uint32_t status = 0;
     const char* env_value = get_env("lock_spoof");
     const char *option = arg + 1;
-    status = (env_value && strcmp(env_value, "1") == 0) ? 1 : 0;
+    status = (env_value && strcmp(env_value, "enabled") == 0) ? 1 : 0;
 
     if (option) {
         if (!strcmp(option, "off")) {
