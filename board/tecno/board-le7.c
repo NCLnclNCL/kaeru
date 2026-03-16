@@ -119,7 +119,47 @@ void board_early_init(void) {
             0xBF00  // nop wtf is this?
         );
     }
+// AVB adds device state info to the kernel cmdline, but it keeps showing
+     // "unlocked" even when we want it to say "locked". This patch forces
+    // the cmdline to always use the "locked" string instead of checking
+    // the actual device state.
+    addr = SEARCH_PATTERN(LK_START, LK_END, 0xE92D, 0x4FF0, 0x4691, 0xF102);
+    if (addr) {
+        printf("Found AVB cmdline function at 0x%08X\n", addr);
+       
+        // Find where in libavb the device state is first fetched and then stored,
+        // then Nop out the code that checks the actual device state.
+        // This forces libavb to always use the "locked" string.
+        NOP(addr + 0x9C, 4);
+    }
+    printf("Bootloader lock status spoofing enabled, applying patches.\n");
 
+    // Need to spoof the LKS_STATE as "locked" for certain scenarios, but still
+    // return success so other parts of the system don't freak out. This makes
+    // seccfg_get_lock_state always report lock_state=1 and return 2.
+    addr = SEARCH_PATTERN(LK_START, LK_END, 0xB1D0, 0xB510, 0x4604, 0xF7FF, 0xFFDD);
+    if (addr) {
+        printf("Found seccfg_get_lock_state at 0x%08X\n", addr);
+        PATCH_MEM(addr + 6, 
+            0x2301,  // movs r3, #1
+            0x6023,  // str r3, [r4, #0]
+            0x2002,  // movs r0, #2
+            0xbd10   // pop {r4, pc}
+        );
+    }
+    // Force the secure boot state to ATTR_SBOOT_ENABLE (0x11). This controls whether
+    // secure boot verification is enabled and is separate from the LKS_STATE above.
+    // Setting it to 0x11 indicates secure boot is properly enabled.
+    addr = SEARCH_PATTERN(LK_START, LK_END, 0xB510, 0x4604, 0x2001, 0xF7FF);
+    if (addr) {
+        printf("Found get_sboot_state at 0x%08X\n", addr);
+        PATCH_MEM(addr,
+            0x2311,  // movs r3, #0x11   - set value to 0x11
+            0x6003,  // str r3, [r0,#0]  - store to *param_1
+            0x2000,  // movs r0, #0      - return 0
+            0x4770   // bx lr            - return
+        );
+    }
     fastboot_register("oem bldr_spoof", cmd_spoof_bootloader_lock, 0);
 }
 
