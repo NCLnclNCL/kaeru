@@ -114,9 +114,9 @@ void board_early_init(void) {
         NOP(addr + 0x6F8, 2);  // "not allowed in locked state" call  //4c426f0c ok
         
         // Jump directly to command handler
-        PATCH_MEM(addr + 0x14A, //  4C42695E ok
-            0x164 // b 4C43481A maybe ok
-    //        0xBF00  // nop wtf is this?
+       PATCH_MEM(addr + 0x14A,
+            0xE00B, // b 0x4c42cf9c
+            0xBF00  // nop
         );
 		//4c426978
     }
