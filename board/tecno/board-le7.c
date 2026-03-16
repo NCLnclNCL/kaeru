@@ -26,7 +26,7 @@ void spoof_lock_state(void) {
         
         // Jump directly to command handler
         PATCH_MEM(addr + 0x14A,
-            0xE00B, // b 0x4c42cf9c
+            0xE006, // b 4C43481A
             0xBF00  // nop
         );
     }
