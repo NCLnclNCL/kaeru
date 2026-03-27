@@ -393,4 +393,9 @@ menu "Device Support"
         default n
         help
           Say Y if you want to include support for Realme c15
+    config REALME_RMX2189
+        bool "Support realme c12"
+        default n
+        help
+          Say Y if you want to include support for realme c12
 endmenu
