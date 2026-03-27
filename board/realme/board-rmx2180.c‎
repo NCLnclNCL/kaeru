@@ -552,7 +552,7 @@ void basic_patches(void){
         printf("Found orange_state_warning at 0x%08X\n", addr);
         FORCE_RETURN(addr, 0);
     }
-   addr = SEARCH_PATTERN(LK_START, LK_END, 0xB530, 0xB083, 0xAB02, 0x2200, 0x4604);
+	addr = SEARCH_PATTERN(LK_START, LK_END, 0x2802, 0xD000, 0x4770, 0xB538);
     if (addr) {
         printf("Found dm_verity_corruption at 0x%08X\n", addr);
         FORCE_RETURN(addr, 0);
