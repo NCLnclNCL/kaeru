@@ -492,9 +492,9 @@ static void spoof_lock_state(void) {
             0xbd10   // pop {r4, pc}
         );
         }
-    PATCH_MEM(FASTBOOT_HNDLR1, 0xE008);
-    PATCH_MEM(FASTBOOT_HNDLR2, 0xE78C);
-    dprintf("fastboot_handler Patched\n");
+ //   PATCH_MEM(FASTBOOT_HNDLR1, 0xE008);
+ //   PATCH_MEM(FASTBOOT_HNDLR2, 0xE78C);
+ //   dprintf("fastboot_handler Patched\n");
 
     addr = SEARCH_PATTERN(LK_START, LK_END, 0xB508, 0xF7FF, 0xFF75, 0xF3C0);
     if (addr) {
