@@ -62,5 +62,5 @@ lib-$(CONFIG_DIGIT_NEXT_ULTRA) += digit/board-next_ultra.o
 lib-$(CONFIG_XIAOMI_EARTH) += xiaomi/board-earth.o
 lib-$(CONFIG_MOTOROLA_LAMUC) += motorola/board-lamu.o
 lib-$(CONFIG_TECNO_LE7) += tecno/board-le7.o
-lib-$(CONFIG_REALME_RMX2180) += realme/board-rmx2180.o
+lib-$(CONFIG_REALME_RMX2180) += realme/board-c12.o
 lib-$(CONFIG_REALME_RMX2189) += realme/board-rmx2189.o
