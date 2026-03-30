@@ -263,7 +263,7 @@ void board_early_init(void) {
         set_bootmode(BOOTMODE_FASTBOOT);
 	show_bootmode(BOOTMODE_FASTBOOT);
     }
-    fastboot_register("oem bldr_spoof", custom_cmd_spoof_bootloader_lock, 0);
+    fastboot_register("oem bldr_spoof", cmd_spoof_bootloader_lock, 0);
 }
 
 void board_late_init(void) {
