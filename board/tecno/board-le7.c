@@ -257,7 +257,7 @@ void board_early_init(void) {
    // PATCH_CALL(ENV_INIT_CALL, (void*)hijack_env_init, TARGET_THUMB);
 
 
-	custom_spoof_lock_state();
+	//custom_spoof_lock_state();
   	   // - Volume down → Fastboot
     if (mtk_detect_key(VOLUME_DOWN)) {
         set_bootmode(BOOTMODE_FASTBOOT);
