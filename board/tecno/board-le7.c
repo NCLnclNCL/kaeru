@@ -167,12 +167,7 @@ void board_early_init(void) {
    // PATCH_CALL(ENV_INIT_CALL, (void*)hijack_env_init, TARGET_THUMB);
 
 
-	//custom_spoof_lock_state();
-  	   // - Volume down → Fastboot
-    if (mtk_detect_key(VOLUME_DOWN)) {
-        set_bootmode(BOOTMODE_FASTBOOT);
-//	show_bootmode(BOOTMODE_FASTBOOT);
-    }
+
     fastboot_register("oem bldr_spoof", cmd_spoof_bootloader_lock, 0);
 }
 
@@ -200,6 +195,12 @@ void board_late_init(void) {
     if (addr) {
         printf("Found dm_verity_corruption at 0x%08X\n", addr);
         FORCE_RETURN(addr, 0);
+    }
+		//custom_spoof_lock_state();
+  	   // - Volume down → Fastboot
+    if (mtk_detect_key(VOLUME_DOWN)) {
+        set_bootmode(BOOTMODE_FASTBOOT);
+//	show_bootmode(BOOTMODE_FASTBOOT);
     }
      if (get_bootmode() != BOOTMODE_NORMAL) {
         // Show the current boot mode on screen when not performing a normal boot.
