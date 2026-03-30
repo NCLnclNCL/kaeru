@@ -9,53 +9,6 @@
 static void env_init(void) {
     ((void (*)(void))(ENV_INIT_ADDR | 1))();
 }
-static void custom_spoof_lock_state(void) {
-    uint32_t addr = 0;
-	printf("Bootloader lock status spoofing enabled, applying patches.\n");
-
-// AVB adds device state info to the kernel cmdline, but it keeps showing
-     // "unlocked" even when we want it to say "locked". This patch forces
-    // the cmdline to always use the "locked" string instead of checking
-    // the actual device state.
-    addr = SEARCH_PATTERN(LK_START, LK_END, 0xE92D, 0x4FF0, 0x4691, 0xF102);
-    if (addr) {
-        printf("Found AVB cmdline function at 0x%08X\n", addr);
-       
-        // Find where in libavb the device state is first fetched and then stored,
-        // then Nop out the code that checks the actual device state.
-        // This forces libavb to always use the "locked" string.
-        NOP(addr + 0x9C, 4);
-    }
-
-
-    // Need to spoof the LKS_STATE as "locked" for certain scenarios, but still
-    // return success so other parts of the system don't freak out. This makes
-    // seccfg_get_lock_state always report lock_state=1 and return 2.
-    addr = SEARCH_PATTERN(LK_START, LK_END, 0xB1D0, 0xB510, 0x4604, 0xF7FF, 0xFFDD);
-    if (addr) {
-        printf("Found seccfg_get_lock_state at 0x%08X\n", addr);
-        PATCH_MEM(addr + 6, 
-            0x2301,  // movs r3, #1
-            0x6023,  // str r3, [r4, #0]
-            0x2002,  // movs r0, #2
-            0xbd10   // pop {r4, pc}
-        );
-    }
-    // Force the secure boot state to ATTR_SBOOT_ENABLE (0x11). This controls whether
-    // secure boot verification is enabled and is separate from the LKS_STATE above.
-    // Setting it to 0x11 indicates secure boot is properly enabled.
-    addr = SEARCH_PATTERN(LK_START, LK_END, 0xB510, 0x4604, 0x2001, 0xF7FF);
-    if (addr) {
-        printf("Found get_sboot_state at 0x%08X\n", addr);
-        PATCH_MEM(addr,
-            0x2311,  // movs r3, #0x11   - set value to 0x11
-            0x6003,  // str r3, [r0,#0]  - store to *param_1
-            0x2000,  // movs r0, #0      - return 0
-            0x4770   // bx lr            - return
-        );
-    }
-
-}
  void spoof_lock_state(void) {
     uint32_t addr = 0;
 	printf("Bootloader lock status spoofing enabled, applying patches.\n");
@@ -103,94 +56,8 @@ static void custom_spoof_lock_state(void) {
     }
 
 }
-static void set_lock_spoof(int enable) {
-    if (enable == 1) {
-        set_env("lock_spoof", "enabled");
-    } else if (enable == 0) {
-        set_env("lock_spoof", "disabled");
-    } else {
-        set_env("lock_spoof", "not_set");
-    }
-}
-static void check_lock_spoof(void)
-{
-    const char *val = get_env("lock_spoof");
-
-    if (val && strcmp(val, "enabled") == 0) {
-        custom_spoof_lock_state();
-        printf("Lock spoof is Enabled\n");
-    } else if (val && strcmp(val, "disabled") == 0) {
-       printf("Lock spoof is Disabled\n");
-    } else if (val && strcmp(val, "not_set") == 0) {
-       printf("Lock spoof is not_set\n");
-    } else {
-       printf("Something went wrong with kaeru lock spoof environment...\n");
-       printf("or possible first boot of kaeru detected...\n");
-       printf("Setting lock_spoof as not_set\n");
-        set_env("lock_spoof", "not_set");
-    }
-}
-void custom_cmd_spoof_bootloader_lock(const char* arg, void* data, unsigned sz) {
-    uint32_t status = 0;
-    const char* env_value = get_env("lock_spoof");
-    const char *option = arg + 1;
-    status = (env_value && strcmp(env_value, "enabled") == 0) ? 1 : 0;
-
-    if (option) {
-        if (!strcmp(option, "off")) {
-            if (status) {
-                set_lock_spoof(0);
-                fastboot_publish("is-spoofing", "0");
-                fastboot_info("Bootloader spoofing disabled.");
-                fastboot_info("A factory reset may be required.");
-            } else {
-                fastboot_info("Bootloader spoofing is already disabled.");
-            }
-            fastboot_okay("");
-            return;
-        }
-
-        if (!strcmp(option, "on")) {
-            if (!status) {
-                set_lock_spoof(1);
-                fastboot_publish("is-spoofing", "1");
-                fastboot_info("Bootloader spoofing enabled.");
-                fastboot_info("A factory reset may be required.");
-            } else {
-                fastboot_info("Bootloader spoofing is already enabled.");
-            }
-            fastboot_okay("");
-            return;
-        }
-
-        if (!strcmp(option, "status")) {
-            fastboot_info(status ?
-                "Bootloader spoofing is currently enabled." :
-                "Bootloader spoofing is currently disabled.");
-            fastboot_info(status ?
-                "Device is currently spoofed as bootloader locked." :
-                "Device is not being spoofed as bootloader locked.");
-            fastboot_okay("");
-            return;
-        }
-    }
 
 
-    fastboot_info("kaeru bootloader lock spoofing control");
-    fastboot_info("");
-    fastboot_info("When enabled, device reports as 'locked' to TEE");
-    fastboot_info("while maintaining full fastboot and root capabilities.");
-    fastboot_info("");
-    fastboot_info("Commands:");
-    fastboot_info("  on     - Enable spoofing (reboot required)");
-    fastboot_info("  off    - Disable spoofing (reboot required)");
-    fastboot_info("  status - Show current state");
-    fastboot_fail("Usage: fastboot oem bldr_spoof <on|off|status>");
-}
-static void hijack_env_init(void) {
-    env_init();
-    check_lock_spoof();
-}
 
 
 void board_early_init(void) {
@@ -218,6 +85,16 @@ void board_early_init(void) {
         printf("Found get_dl_policy at 0x%08X\n", addr);
         FORCE_RETURN(addr, 0);
     }
+	    // This function handles certificate chain and hash verification for
+    // modem-related images (md1rom, md3rom, etc.) during the modem loading
+    // process. Same idea as above — force it to return 0 so modem images
+    // can be loaded without passing signature verification.
+    addr = SEARCH_PATTERN(LK_START, LK_END, 0xE92D, 0x43F0, 0x460C, 0x4601);
+    if (addr) {
+        printf("Found ccci_ld_md_sec_ptr_hdr_verify at 0x%08X\n", addr);
+        FORCE_RETURN(addr, 0);
+    }
+	
     // The environment area isn't initialized yet when board_early_init
     // runs, so any get_env calls would return NULL at this stage. We
     // hook a printf call in platform_init that runs right after env
