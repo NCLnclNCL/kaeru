@@ -200,7 +200,7 @@ void board_late_init(void) {
   	   // - Volume down → Fastboot
     if (mtk_detect_key(VOLUME_DOWN)) {
         set_bootmode(BOOTMODE_FASTBOOT);
-//	show_bootmode(BOOTMODE_FASTBOOT);
+     	show_bootmode(BOOTMODE_FASTBOOT);
     }
      if (get_bootmode() != BOOTMODE_NORMAL) {
         // Show the current boot mode on screen when not performing a normal boot.
