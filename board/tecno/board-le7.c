@@ -54,7 +54,32 @@ static void env_init(void) {
             0x4770   // bx lr            - return
         );
     }
+    // AVB verifies vbmeta public keys in two places: once for the main
+    // vbmeta image (validate_vbmeta_public_key) and once for chained
+    // vbmeta images (avb_safe_memcmp against the expected key). Both
+    // reject the boot if the key doesn't match, causing the "Public key
+    // used to sign data rejected" error. We patch both checks so any
+    // key is accepted regardless.
+    addr = SEARCH_PATTERN(LK_START, LK_END, 0xF47F, 0xAE6B, 0xE688, 0xF8DD);
+    if (addr) {
+        printf("Found load_and_verify_vbmeta at 0x%08X\n", addr);
 
+        // The chain key check first compares key lengths before calling
+        // memcmp. If lengths differ, it skips memcmp and falls straight
+        // to the error path. Change "cmp r2, r3" to "cmp r3, r3" so the
+        // length check always succeeds, allowing execution to reach the
+        // memcmp path (which we NOP below).
+      //  PATCH_MEM(addr - 0x32C, 0x451B);
+
+        // NOP the bne.w that rejects mismatched chained vbmeta keys,
+        // falling through to the success path unconditionally.
+     //   NOP(addr, 2);
+
+        // Replace "cmp r3, #0" with "movs r3, #1" so key_is_trusted
+        // is always nonzero and the following bne.w takes the success
+        // branch.
+       // PATCH_MEM(addr + 0x72, 0x2301);
+    }
 }
 
 
