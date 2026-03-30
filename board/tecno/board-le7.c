@@ -60,7 +60,7 @@ static void env_init(void) {
     // reject the boot if the key doesn't match, causing the "Public key
     // used to sign data rejected" error. We patch both checks so any
     // key is accepted regardless.
-    addr = SEARCH_PATTERN(LK_START, LK_END, 0xF47F, 0xAE6B, 0xE688, 0xF8DD);
+    addr = SEARCH_PATTERN(LK_START, LK_END, 0x4FF0, 0xE92D, 0x5D44, 0xF2AD);
     if (addr) {
         printf("Found load_and_verify_vbmeta at 0x%08X\n", addr);
 
