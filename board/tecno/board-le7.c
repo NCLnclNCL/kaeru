@@ -162,6 +162,13 @@ void board_early_init(void) {
         );
 		//4c426978
     }
+			//custom_spoof_lock_state();
+  	   // - Volume down → Fastboot
+	    if (mtk_detect_key(1)) {
+		printf("Found volume_down ");
+       // set_bootmode(BOOTMODE_FASTBOOT);
+		FORCE_RETURN(0x4c419c48, 1);
+    }
 	    // Patch calling env_init to inject check_lock_spoof() right after 
     // manual initialization of environment
    // PATCH_CALL(ENV_INIT_CALL, (void*)hijack_env_init, TARGET_THUMB);
@@ -195,23 +202,6 @@ void board_late_init(void) {
     if (addr) {
         printf("Found dm_verity_corruption at 0x%08X\n", addr);
         FORCE_RETURN(addr, 0);
-    }
-		//custom_spoof_lock_state();
-  	   // - Volume down → Fastboot
-    if (mtk_detect_key(VOLUME_DOWN)) {
-		printf("Found volume_down 1");
-        set_bootmode(BOOTMODE_FASTBOOT);
-     	show_bootmode(BOOTMODE_FASTBOOT);
-    }
-	    if (mtk_detect_key(1)) {
-		printf("Found volume_down 2");
-        set_bootmode(BOOTMODE_FASTBOOT);
-     	show_bootmode(BOOTMODE_FASTBOOT);
-    }
-	    if (mtk_detect_key(0)) {
-		printf("Found volume_down 3");
-        set_bootmode(BOOTMODE_FASTBOOT);
-     	show_bootmode(BOOTMODE_FASTBOOT);
     }
         // Show the current boot mode on screen when not performing a normal boot.
         // This is standard behavior in many LK images, but not in this one by default.
