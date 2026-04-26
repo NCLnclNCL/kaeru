@@ -199,16 +199,15 @@ void board_late_init(void) {
 		//custom_spoof_lock_state();
   	   // - Volume down → Fastboot
     if (mtk_detect_key(VOLUME_DOWN)) {
+		printf("Found volume_down");
         set_bootmode(BOOTMODE_FASTBOOT);
      	show_bootmode(BOOTMODE_FASTBOOT);
     }
-     if (get_bootmode() != BOOTMODE_NORMAL) {
         // Show the current boot mode on screen when not performing a normal boot.
         // This is standard behavior in many LK images, but not in this one by default.
         //
         // Displaying the boot mode can be helpful for developers, as it provides
         // immediate feedback and can prevent debugging headaches.
         show_bootmode(get_bootmode());
-    }
 
 }
