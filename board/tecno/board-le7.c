@@ -165,12 +165,12 @@ void board_early_init(void) {
 			//custom_spoof_lock_state();
   	   // - Volume down → Fastboot
 	    if (mtk_detect_key(1)) {
-		printf("Found volume_down ");
+		printf("Found volume_down \n");
        // set_bootmode(BOOTMODE_FASTBOOT);
 		FORCE_RETURN(0x4c419c48, 1);
     }
 	 if (mtk_detect_key(0)) {
-		printf("Found volume_up ");
+		printf("Found volume_up \n");
         set_bootmode(BOOTMODE_RECOVERY);
 		//FORCE_RETURN(0x4c404550, 0);
     }
