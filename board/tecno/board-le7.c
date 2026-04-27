@@ -169,6 +169,11 @@ void board_early_init(void) {
        // set_bootmode(BOOTMODE_FASTBOOT);
 		FORCE_RETURN(0x4c419c48, 1);
     }
+	 if (mtk_detect_key(0)) {
+		printf("Found volume_up ");
+       // set_bootmode(BOOTMODE_FASTBOOT);
+		FORCE_RETURN(0x4c404550, 0);
+    }
 	    // Patch calling env_init to inject check_lock_spoof() right after 
     // manual initialization of environment
    // PATCH_CALL(ENV_INIT_CALL, (void*)hijack_env_init, TARGET_THUMB);
