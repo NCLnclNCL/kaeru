@@ -194,7 +194,7 @@ void board_late_init(void) {
         printf("Found dm_verity_corruption at 0x%08X\n", addr);
         FORCE_RETURN(addr, 0);
     }
-	if (mtk_detect_key(VOLUME_DOWN)) {
+	if (mtk_detect_key(KEY_VOLUME_DOWN)) {
         ((void (*)(void))(0x48027bc4 | 1))();
     }
         // Show the current boot mode on screen when not performing a normal boot.
