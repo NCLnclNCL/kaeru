@@ -2,7 +2,10 @@
 // SPDX-FileCopyrightText: 2026 Your name <your.email@example.com>
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
-#define VOLUME_DOWN 17
+#define KEY_VOLUME_UP 17
+#define KEY_VOLUME_DOWN 1
+#define KEY_POWER 8
+
 #define ENV_INIT_CALL	0x4c4028a4
 #define ENV_INIT_ADDR	0x4c44c1b4
 #include <board_ops.h>
