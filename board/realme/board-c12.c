@@ -96,7 +96,7 @@ static const char *get_sbc_status(void) {
 
 
 void board_early_init(void) {
-    printf("Entering early init for tecno pova 2\n");
+    printf("Entering early init for realme c12\n");
     uint32_t addr = 0;
     // Regardless of whether spoofing is enabled, we always need to
     // disable image authentication. The user may just be using this
@@ -177,7 +177,7 @@ void board_early_init(void) {
 }
 
 void board_late_init(void) {
-    printf("Entering late init for tecno pova 2\n");
+    printf("Entering late init for realme c12\n");
     uint32_t addr = 0;
 
     // Suppresses the bootloader unlock warning shown during boot on
