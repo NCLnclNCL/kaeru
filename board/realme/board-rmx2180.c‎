@@ -12,6 +12,13 @@
 static void env_init(void) {
     ((void (*)(void))(ENV_INIT_ADDR | 1))();
 }
+static const char *get_sbc_status(void) {
+    uint32_t *sbc_reg = (uint32_t*)0x11c50060;
+    uint32_t value = *sbc_reg;
+    uint32_t sbc_enabled = (value << 0x1E) >> 0x1F;
+    
+    return sbc_enabled ? "enabled" : "disabled";
+}
  void spoof_lock_state(void) {
     uint32_t addr = 0;
 	printf("Bootloader lock status spoofing enabled, applying patches.\n");
@@ -203,5 +210,6 @@ void board_late_init(void) {
         // Displaying the boot mode can be helpful for developers, as it provides
         // immediate feedback and can prevent debugging headaches.
         show_bootmode(get_bootmode());
+	printf("Secure boot: at 0x%08X\n", get_sbc_status());
 
 }
