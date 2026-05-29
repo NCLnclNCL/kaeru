@@ -130,7 +130,12 @@ void board_early_init(void) {
     // modem-related images (md1rom, md3rom, etc.) during the modem loading
     // process. Same idea as above, force it to return 0 so modem images
     // can be loaded without passing signature verification.
-    addr = SEARCH_PATTERN(LK_START, LK_END, 0xE02D, 0x47F0, 0xB082);
+    addr = SEARCH_PATTERN(LK_START, LK_END, 0xE92D, 0x43F0, 0x460C, 0x4601);
+    if (addr) {
+        printf("Found ccci_ld_md_sec_image_verify at 0x%08X\n", addr);
+        FORCE_RETURN(addr, 0);
+    }
+    addr = SEARCH_PATTERN(LK_START, LK_END, 0xE92D, 0x41F0, 0x460A, 0x4604);
     if (addr) {
         printf("Found ccci_ld_md_sec_ptr_hdr_verify at 0x%08X\n", addr);
         FORCE_RETURN(addr, 0);
