@@ -398,4 +398,9 @@ menu "Device Support"
         default n
         help
           Say Y if you want to include support for realme c12
+    config REALME_RMX2176_T
+        bool "Support rmx2176"
+        default n
+        help
+          Say Y if you want to include support for rmx2176
 endmenu
