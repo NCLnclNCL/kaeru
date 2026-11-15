@@ -12,9 +12,9 @@
 void board_early_init(void) {
     printf("Entering early init for rmx2176\n");
     FORCE_RETURN(0x4c47a8ac, 0);
-    dprintf("unlock_verify_ok Patched\n");
+    printf("unlock_verify_ok Patched\n");
     FORCE_RETURN(0x4c4568c0, 0);
-    dprintf("Orange_State Patched\n");
+    printf("Orange_State Patched\n");
     // - Volume Up → Recovery
     // - Volume Down → Fastboot
     if (mtk_detect_key(VOLUME_UP)) {
