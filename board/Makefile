@@ -64,3 +64,6 @@ lib-$(CONFIG_MOTOROLA_LAMUC) += motorola/board-lamu.o
 lib-$(CONFIG_TECNO_LE7) += tecno/board-le7.o
 lib-$(CONFIG_REALME_RMX2180) += realme/board-c12.o
 lib-$(CONFIG_REALME_RMX2189) += realme/board-rmx2189.o
+lib-$(CONFIG_REALME_RMX2176_T) += realme/board-rmx2176_t.o
+lib-$(CONFIG_VENDOR_ROSEMARY_S) += vendor/board-rosemary_s.o
+lib-$(CONFIG_VENDOR_ROSEMARY_T) += vendor/board-rosemary_t.o
